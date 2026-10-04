@@ -1,0 +1,29 @@
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body { @apply bg-bg font-sans text-ink antialiased; }
+  :focus-visible { @apply outline outline-2 outline-offset-2 outline-brand; }
+  ::selection { background: rgba(47, 128, 255, 0.35); }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md border border-line-strong px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-raised disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply border-brand bg-brand text-white hover:border-brand-hover hover:bg-brand-hover; }
+  .btn-ghost { @apply border-transparent text-muted hover:bg-raised hover:text-ink; }
+  .input { @apply w-full rounded-md border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-faint transition-colors focus:border-brand focus:outline-none; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .hint { @apply mt-1 text-xs text-muted; }
+  .page { @apply animate-rise; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

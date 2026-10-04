@@ -1,0 +1,171 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+enum InterviewType {
+  DSA
+  SYSTEM_DESIGN
+  CS_FUNDAMENTALS
+  AI_GENAI
+  BEHAVIORAL
+  MIXED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum InterviewStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum MessageRole {
+  INTERVIEWER
+  CANDIDATE
+}
+
+enum ReviewStatus {
+  COMPLETED
+  FAILED
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  INDEXED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  interviews  Interview[]
+  codeReviews CodeReview[]
+  experiences Experience[]
+  documents   Document[]
+  chunks      DocumentChunk[]
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  userId        String
+  type          InterviewType
+  difficulty    Difficulty
+  questionCount Int
+  questionsAsked Int            @default(1)
+  status        InterviewStatus @default(ACTIVE)
+  score         Float?
+  report        Json?
+  createdAt     DateTime        @default(now())
+  completedAt   DateTime?
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages InterviewMessage[]
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// `meta` holds the rubric evaluation for candidate messages. The score shown to the user
+// is computed from these levels in code, not taken from the model as a free number.
+model InterviewMessage {
+  id          String      @id @default(cuid())
+  interviewId String
+  role        MessageRole
+  content     String
+  meta        Json?
+  createdAt   DateTime    @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId, createdAt])
+}
+
+model CodeReview {
+  id               String       @id @default(cuid())
+  userId           String
+  language         String
+  problemStatement String
+  code             String
+  status           ReviewStatus @default(COMPLETED)
+  result           Json?
+  createdAt        DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Experience {
+  id         String        @id @default(cuid())
+  authorId   String
+  company    String
+  role       String
+  round      String
+  interviewType InterviewType
+  difficulty Difficulty
+  questions  String
+  preparation String?
+  overall    String
+  advice     String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([company])
+}
+
+// RAG tables. The RAG module under src/rag is complete but intentionally not mounted
+// on any route yet. embedding is a pgvector column (see src/rag/repositories).
+model Document {
+  id           String         @id @default(cuid())
+  userId       String
+  title        String
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  domain       String?
+  status       DocumentStatus @default(UPLOADED)
+  errorMessage String?
+  rawText      String
+  chunkCount   Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chunks DocumentChunk[]
+}
+
+model DocumentChunk {
+  id         String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId String
+  userId     String
+  chunkIndex Int
+  content    String
+  metadata   Json                   @default("{}")
+  embedding  Unsupported("vector(768)")?
+  createdAt  DateTime               @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([userId])
+}
