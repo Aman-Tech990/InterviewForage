@@ -5,6 +5,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react()],
-    server: { proxy: { '/api': { target: env.VITE_DEV_PROXY_TARGET || 'http://localhost:3000', changeOrigin: true } } },
+    server: { proxy: { '/api': { target: env.VITE_DEV_PROXY_TARGET || 'https://interviewforage.onrender.com', changeOrigin: true } } },
   };
 });

@@ -19,7 +19,9 @@ export class ApiError extends Error {
 // One client for the whole app: base URL, auth header, timeout and error shape live here.
 // AI calls can take several seconds, so the timeout is generous.
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.PROD
+    ? 'https://interviewforage.onrender.com/api'
+    : '/api',
   timeout: 60000,
 });
 
