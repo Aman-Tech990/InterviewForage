@@ -1,6 +1,6 @@
-# 🎯 Interview Forage
+# ✨ Interview Forage
 
-> **Interview Forage is not just another interview preparation website. It is the place where interview preparation turns into an actual interview experience.**
+> **Interview Forage is not just another interview preparation platform. It is the place where interview preparation turns into an actual interview experience.**
 
 Every interview starts with the same problem.
 
